@@ -1,5 +1,6 @@
 import csv
 import re
+import os
 import threading
 import time
 from datetime import datetime
@@ -89,6 +90,26 @@ except ImportError:
             pass
 
 console = Console()
+
+
+def get_web_app_url():
+    web_app_url = os.getenv("WEB_APP_URL")
+    if web_app_url:
+        return web_app_url
+
+    vercel_url = os.getenv("VERCEL_URL")
+    if vercel_url:
+        if not vercel_url.startswith("http://") and not vercel_url.startswith("https://"):
+            vercel_url = f"https://{vercel_url}"
+        return vercel_url
+
+    return "http://localhost:8000/index.html"
+
+
+def display_web_app_link():
+    web_app_url = get_web_app_url()
+    console.print("\n[bold cyan]Web page:[/bold cyan] [underline blue]{}[/underline blue]".format(web_app_url))
+    console.print("[dim]Open this in your browser to use the web version of the app.[/dim]\n")
 
 def display_banner():
     """Display colorful banner
@@ -490,6 +511,7 @@ def monitor_incoming_emails():
 
 def main():
     try:
+        display_web_app_link()
         display_banner()
         
         while True:
