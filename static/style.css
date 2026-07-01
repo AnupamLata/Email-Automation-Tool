@@ -409,6 +409,12 @@ textarea:focus {
   font-size: 0.88rem;
 }
 
+.field-hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .primary-button {
   padding: 0 18px;
   background: var(--blue);

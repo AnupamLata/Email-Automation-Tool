@@ -6,3 +6,19 @@
 [2026-06-29 11:47:50] | To: riya@gmail.com | Status: [SUCCESS] | Subject: asfg
 [2026-06-29 11:47:55] | To: aman@gmail.com | Status: [SUCCESS] | Subject: asfg
 [2026-06-29 12:29:13] | To: anikety7905@gmail.com | Status: [SUCCESS] | Subject: Auto-Reply
+[2026-07-01 17:37:02] | To: test@example.com | Status: [FAILED] | Subject: Test | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:39:27] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Follow-up on our conversation | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:39:32] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Follow-up on our conversation | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:39:48] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Follow-up on our conversation | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:39:56] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Follow-up on our conversation | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:45:18] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Project update | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:45:21] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Project update | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:46:04] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Project update | Message: EMAIL and PASSWORD environment variables are required
+[2026-07-01 17:52:10] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Support reply | Message: Unexpected error: [Errno 11001] getaddrinfo failed
+[2026-07-01 17:52:22] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Support reply | Message: Unexpected error: [Errno 11001] getaddrinfo failed
+[2026-07-01 17:56:17] | To: anikety7905@gmail.com | Status: [FAILED] | Subject: Support reply | Message: Authentication failed. Check EMAIL and PASSWORD in .env
+[2026-07-01 18:03:18] | To: yanu77662@gmail.com | Status: [SUCCESS] | Subject: SMTP test
+[2026-07-01 18:04:11] | To: anikety7905@gmail.com | Status: [SUCCESS] | Subject: Follow-up on our conversation
+[2026-07-01 18:06:09] | To: rahul@gmail.com | Status: [SUCCESS] | Subject: Monthly update
+[2026-07-01 18:06:13] | To: riya@gmail.com | Status: [SUCCESS] | Subject: Monthly update
+[2026-07-01 18:06:18] | To: aman@gmail.com | Status: [SUCCESS] | Subject: Monthly update

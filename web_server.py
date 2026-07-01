@@ -73,6 +73,23 @@ def _write_env_values(values):
     ENV_FILE.write_text("\n".join(lines), encoding="utf-8")
 
 
+def _normalize_smtp_server(value):
+    candidate = (value or "").strip()
+    if not candidate:
+        return "smtp.gmail.com"
+
+    lowered = candidate.lower()
+    if "@" in candidate or lowered.startswith("mailto:"):
+        return "smtp.gmail.com"
+
+    return candidate
+
+
+def _is_gmail_address(email):
+    lowered = (email or "").strip().lower()
+    return lowered.endswith("@gmail.com") or lowered.endswith("@googlemail.com")
+
+
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         write_json_response(self, 204, {})
@@ -136,14 +153,22 @@ class handler(BaseHTTPRequestHandler):
 
         if self.path == "/api/settings":
             current = _read_env_values()
+            email = current.get("EMAIL", "")
+            smtp_server = current.get("SMTP_SERVER", "smtp.gmail.com")
+            port = current.get("PORT", "587")
+
+            if _is_gmail_address(email):
+                smtp_server = "smtp.gmail.com"
+                port = "587"
+
             write_json_response(
                 self,
                 200,
                 {
-                    "email": current.get("EMAIL", ""),
-                    "smtpServer": current.get("SMTP_SERVER", "smtp.gmail.com"),
-                    "port": current.get("PORT", "587"),
-                    "configured": bool(current.get("EMAIL")) and bool(current.get("PASSWORD")),
+                    "email": email,
+                    "smtpServer": smtp_server,
+                    "port": port,
+                    "configured": bool(email) and bool(current.get("PASSWORD")),
                 },
             )
             return
@@ -323,8 +348,12 @@ class handler(BaseHTTPRequestHandler):
 
             email = (body.get("email") or "").strip()
             password = (body.get("password") or "").strip()
-            smtp_server = (body.get("smtpServer") or "smtp.gmail.com").strip() or "smtp.gmail.com"
+            smtp_server = _normalize_smtp_server(body.get("smtpServer"))
             port = str((body.get("port") or "587")).strip() or "587"
+
+            if _is_gmail_address(email):
+                smtp_server = "smtp.gmail.com"
+                port = "587"
 
             current = _read_env_values()
             if not password:

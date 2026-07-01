@@ -147,6 +147,7 @@
               <label>
                 Password or app password
                 <input id="settingsPassword" type="password" placeholder="your app password" />
+                <small class="field-hint">For Gmail, use a Google App Password. Regular account passwords usually will not work for SMTP.</small>
               </label>
               <label>
                 SMTP server
@@ -157,7 +158,7 @@
                 <input id="settingsPort" type="number" min="1" step="1" placeholder="587" />
               </label>
               <div class="form-footer settings-footer">
-                <div id="settingsMeta" class="input-meta">Save your email credentials to enable sending.</div>
+                <div id="settingsMeta" class="input-meta">Save your email credentials to enable sending. Gmail requires an App Password.</div>
                 <button id="saveSettingsBtn" class="primary-button" type="submit">Save Settings</button>
               </div>
             </form>

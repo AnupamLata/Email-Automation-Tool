@@ -334,6 +334,17 @@ async function api(path, options = {}) {
       return { total: 0, success: 0, failed: 0, entries: [] };
     }
 
+    if (path === '/api/settings' && options.method === 'POST') {
+      const smtpServer = (body.smtpServer || '').trim();
+      return {
+        status: 'saved',
+        configured: true,
+        email: (body.email || '').trim(),
+        smtpServer: smtpServer && !smtpServer.includes('@') ? smtpServer : 'smtp.gmail.com',
+        port: (body.port || '587').toString().trim() || '587'
+      };
+    }
+
     throw new Error(`Unsupported demo request: ${path}`);
   }
 
@@ -432,11 +443,33 @@ function populateSettings(settings = {}) {
     : 'Enter your email and password to enable sending.';
 }
 
+function applyEmailProviderDefaults() {
+  const email = elements.settingsEmail.value.trim().toLowerCase();
+  if (email.endsWith('@gmail.com') || email.endsWith('@googlemail.com')) {
+    elements.settingsSmtp.value = 'smtp.gmail.com';
+    elements.settingsPort.value = '587';
+    elements.settingsMeta.textContent = 'Gmail detected. Using smtp.gmail.com:587 and a Google App Password.';
+  }
+}
+
 async function getCurrentSettings() {
   try {
     return await api('/api/settings');
   } catch (error) {
     return { configured: false };
+  }
+}
+
+function sanitizeSettingsInput() {
+  applyEmailProviderDefaults();
+
+  const smtpServer = elements.settingsSmtp.value.trim();
+  if (!smtpServer || smtpServer.includes('@') || smtpServer.toLowerCase().startsWith('mailto:')) {
+    elements.settingsSmtp.value = 'smtp.gmail.com';
+  }
+
+  if (!elements.settingsPort.value.trim()) {
+    elements.settingsPort.value = '587';
   }
 }
 
@@ -642,6 +675,9 @@ elements.jumpToSettingsBtn.addEventListener('click', () => {
   elements.settingsEmail.focus();
 });
 
+elements.settingsSmtp.addEventListener('blur', sanitizeSettingsInput);
+elements.settingsEmail.addEventListener('blur', applyEmailProviderDefaults);
+
 elements.sendForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = $('#sendBtn');
@@ -650,11 +686,29 @@ elements.sendForm.addEventListener('submit', async (event) => {
   try {
     const settings = await getCurrentSettings();
     if (!settings.configured) {
-      activateTab('composePanel');
-      elements.settingsForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      elements.settingsEmail.focus();
-      showToast('Save SMTP settings first, then send again.', 'warning');
-      return;
+      sanitizeSettingsInput();
+      const email = elements.settingsEmail.value.trim();
+      const password = elements.settingsPassword.value;
+      if (!email || !password) {
+        activateTab('composePanel');
+        elements.settingsForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        elements.settingsEmail.focus();
+        showToast('Enter SMTP settings first, then send again.', 'warning');
+        return;
+      }
+
+      await api('/api/settings', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          password,
+          smtpServer: elements.settingsSmtp.value.trim(),
+          port: elements.settingsPort.value.trim()
+        })
+      });
+
+      elements.settingsPassword.value = '';
+      showToast('SMTP settings saved. Sending email now...', 'success');
     }
 
     const data = await api('/api/send_email', {
@@ -671,7 +725,7 @@ elements.sendForm.addEventListener('submit', async (event) => {
     await refreshLogsAndStatus();
   } catch (error) {
     if (error.message.includes('EMAIL and PASSWORD')) {
-      showToast('Save SMTP settings first, then send again.', 'warning');
+      showToast('Enter SMTP settings first, then send again.', 'warning');
     } else {
       showToast(error.message, 'error');
     }
@@ -772,6 +826,7 @@ elements.settingsForm.addEventListener('submit', async (event) => {
   setButtonLoading(button, true, 'Saving...');
 
   try {
+    sanitizeSettingsInput();
     const data = await api('/api/settings', {
       method: 'POST',
       body: JSON.stringify({

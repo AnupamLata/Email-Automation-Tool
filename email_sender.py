@@ -131,7 +131,7 @@ def send_email(receiver, subject, message):
         return True, metadata
 
     except smtplib.SMTPAuthenticationError as e:
-        error_msg = "Authentication failed. Check EMAIL and PASSWORD in .env"
+        error_msg = "Authentication failed. For Gmail, use a Google App Password and verify EMAIL/PASSWORD in .env"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
         metadata["message"] = error_msg

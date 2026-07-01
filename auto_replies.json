@@ -15,6 +15,10 @@
     {
       "subject": "Inquiry",
       "reply_message": "Thank you for your inquiry. We appreciate your interest and will respond shortly."
+    },
+    {
+      "subject": "Hello",
+      "reply_message": "Thank you for reaching out ."
     }
   ]
 }
