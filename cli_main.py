@@ -2,17 +2,91 @@ import csv
 import re
 import threading
 import time
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.progress import track
-from rich.prompt import Prompt, Confirm
-from rich.syntax import Syntax
 from datetime import datetime
 from email_sender import send_email, validate_email
 from logger import log_email_send, get_log_summary, view_logs, clear_logs
 from email_reader import EmailReader
 from auto_reply_engine import AutoReplyEngine
+
+try:
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.progress import track
+    from rich.prompt import Prompt, Confirm
+    from rich.syntax import Syntax
+except ImportError:
+    class Console:
+        def print(self, *args, **kwargs):
+            print(*args)
+
+    class Panel:
+        def __init__(self, renderable, title=None, border_style=None):
+            self.renderable = renderable
+            self.title = title
+
+        def __str__(self):
+            if self.title:
+                return f"{self.title}\n{self.renderable}"
+            return str(self.renderable)
+
+    class Table:
+        def __init__(self, title=None, border_style=None):
+            self.title = title
+            self.columns = []
+            self.rows = []
+
+        @classmethod
+        def grid(cls, padding=0):
+            return cls()
+
+        def add_column(self, header, **kwargs):
+            self.columns.append(header)
+
+        def add_row(self, *values):
+            self.rows.append(values)
+
+        def __str__(self):
+            lines = []
+            if self.title:
+                lines.append(self.title)
+            if self.columns:
+                lines.append(" | ".join(self.columns))
+                lines.append("-" * max(3, len(lines[-1])))
+            for row in self.rows:
+                lines.append(" | ".join(str(value) for value in row))
+            return "\n".join(lines)
+
+    def track(iterable, description=""):
+        if description:
+            print(description, end="", flush=True)
+        for item in iterable:
+            yield item
+        if description:
+            print()
+
+    class Prompt:
+        @staticmethod
+        def ask(prompt_text, choices=None):
+            while True:
+                value = input(f"{prompt_text}: ").strip()
+                if not choices or value in choices:
+                    return value
+                print(f"Please choose one of: {', '.join(choices)}")
+
+    class Confirm:
+        @staticmethod
+        def ask(prompt_text):
+            while True:
+                value = input(f"{prompt_text} [y/n]: ").strip().lower()
+                if value in {"y", "yes"}:
+                    return True
+                if value in {"n", "no"}:
+                    return False
+
+    class Syntax:
+        def __init__(self, *args, **kwargs):
+            pass
 
 console = Console()
 
