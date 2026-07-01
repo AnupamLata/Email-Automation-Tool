@@ -20,6 +20,14 @@
         <div id="configBadge" class="status-badge is-loading">Checking setup</div>
       </header>
 
+      <section id="setupAlert" class="setup-alert is-hidden" role="status" aria-live="polite">
+        <div>
+          <strong>SMTP settings are required before sending.</strong>
+          <p>Use the settings panel on the right to save your email address and app password, then try sending again.</p>
+        </div>
+        <button id="jumpToSettingsBtn" class="ghost-button" type="button">Open Settings</button>
+      </section>
+
       <section class="metrics-grid" aria-label="System metrics">
         <article class="metric-card metric-action" tabindex="0" role="button" data-tab-target="contactsPanel">
           <span>Contacts</span>

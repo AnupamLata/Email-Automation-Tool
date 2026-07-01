@@ -157,7 +157,9 @@ const elements = {
   settingsPassword: $('#settingsPassword'),
   settingsSmtp: $('#settingsSmtp'),
   settingsPort: $('#settingsPort'),
-  settingsMeta: $('#settingsMeta')
+  settingsMeta: $('#settingsMeta'),
+  setupAlert: $('#setupAlert'),
+  jumpToSettingsBtn: $('#jumpToSettingsBtn')
 };
 
 function escapeHtml(value = '') {
@@ -398,6 +400,7 @@ function renderStatus(config = {}) {
   const configured = config.emailConfigured && config.passwordConfigured;
   elements.configBadge.textContent = demoMode ? 'Demo mode' : configured ? 'SMTP ready' : 'Setup needed';
   elements.configBadge.className = `status-badge ${demoMode ? 'is-warning' : configured ? 'is-ready' : 'is-warning'}`;
+  elements.setupAlert.classList.toggle('is-hidden', configured || demoMode);
 
   const files = config.files || {};
   const smtpValue = demoMode ? 'Browser demo / local storage' : `${config.smtpServer || 'smtp.gmail.com'}:${config.port || '587'}`;
@@ -427,6 +430,14 @@ function populateSettings(settings = {}) {
   elements.settingsMeta.textContent = settings.configured
     ? 'Settings loaded. Leave password empty to keep the current one.'
     : 'Enter your email and password to enable sending.';
+}
+
+async function getCurrentSettings() {
+  try {
+    return await api('/api/settings');
+  } catch (error) {
+    return { configured: false };
+  }
 }
 
 function renderContacts() {
@@ -626,12 +637,26 @@ $('#refreshBtn').addEventListener('click', async () => {
   }
 });
 
+elements.jumpToSettingsBtn.addEventListener('click', () => {
+  elements.settingsForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  elements.settingsEmail.focus();
+});
+
 elements.sendForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = $('#sendBtn');
   setButtonLoading(button, true, 'Sending...');
 
   try {
+    const settings = await getCurrentSettings();
+    if (!settings.configured) {
+      activateTab('composePanel');
+      elements.settingsForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      elements.settingsEmail.focus();
+      showToast('Save SMTP settings first, then send again.', 'warning');
+      return;
+    }
+
     const data = await api('/api/send_email', {
       method: 'POST',
       body: JSON.stringify({
@@ -645,7 +670,11 @@ elements.sendForm.addEventListener('submit', async (event) => {
     showToast(`Email sent to ${data.recipient}.`, 'success');
     await refreshLogsAndStatus();
   } catch (error) {
-    showToast(error.message, 'error');
+    if (error.message.includes('EMAIL and PASSWORD')) {
+      showToast('Save SMTP settings first, then send again.', 'warning');
+    } else {
+      showToast(error.message, 'error');
+    }
   } finally {
     setButtonLoading(button, false);
   }

@@ -58,6 +58,35 @@ button {
   margin-bottom: 18px;
 }
 
+.setup-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid rgba(183, 121, 31, 0.25);
+  border-radius: calc(var(--radius) + 4px);
+  background: linear-gradient(135deg, rgba(255, 247, 232, 0.95), rgba(255, 255, 255, 0.95));
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.setup-alert strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #8c5c13;
+}
+
+.setup-alert p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.setup-alert.is-hidden {
+  display: none;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   color: var(--teal);
@@ -438,6 +467,16 @@ button:disabled {
   padding: 12px;
 }
 
+.status-row {
+  align-items: center;
+  min-height: 56px;
+}
+
+.status-row strong {
+  text-align: right;
+  color: var(--text);
+}
+
 .status-row span,
 .data-row span,
 .log-row span,
@@ -555,6 +594,17 @@ button:disabled {
 
 .toast.warning {
   background: var(--amber);
+}
+
+@media (max-width: 760px) {
+  .setup-alert {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .setup-alert .ghost-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 980px) {
