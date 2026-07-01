@@ -72,6 +72,14 @@ def send_email(receiver, subject, message):
         "status": None,
         "message": None
     }
+
+    if not EMAIL or not PASSWORD:
+        error_msg = "EMAIL and PASSWORD environment variables are required"
+        print(f"[FAILED] {error_msg}")
+        metadata["status"] = "FAILED"
+        metadata["message"] = error_msg
+        log_email_send(receiver, subject, "[FAILED]", error_msg)
+        return False, metadata
     
     # Validate receiver email
     if not validate_email(receiver):
