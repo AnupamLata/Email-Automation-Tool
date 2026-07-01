@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Email Automation Tool — Web</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Email Automation Tool</h1>
+
+      <form id="sendForm">
+        <label>Recipient email
+          <input id="receiver" type="email" placeholder="recipient@example.com" required />
+        </label>
+
+        <label>Subject
+          <input id="subject" type="text" placeholder="Subject" required />
+        </label>
+
+        <label>Message
+          <textarea id="message" rows="6" placeholder="Write your message here" required></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="sendBtn" type="submit">Send Email</button>
+        </div>
+      </form>
+
+      <div id="status" aria-live="polite"></div>
+      <footer>
+        <small>This page calls the serverless function at <code>/api/send_email</code>.</small>
+      </footer>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

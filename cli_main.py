@@ -61,20 +61,6 @@ def display_menu():
     console.print(Panel(menu, title="[bold]Main Menu[/bold]", border_style="blue"))
 
 def send_single_email():
-    """Send a single email with validation
-    
-    Workflow:
-    1. Prompt for recipient email
-    2. Validate email format (regex check)
-    3. Prompt for subject and message
-    4. Show email preview table
-    5. Request confirmation
-    6. Send via email_sender.send_email()
-    7. Display status
-    
-    All inputs are stripped and validated before use.
-    Uses logger.py to track the send attempt.
-    """
     console.print("\n[bold yellow]📬 Single Email Mode[/bold yellow]\n")
     
     while True:
@@ -94,7 +80,6 @@ def send_single_email():
         console.print("[red]❌ Message cannot be empty[/red]")
         return
     
-    # Display summary before sending
     summary_table = Table(title="Email Summary", border_style="cyan")
     summary_table.add_column("Field", style="blue")
     summary_table.add_column("Value", style="green")
@@ -114,26 +99,6 @@ def send_single_email():
         console.print("[yellow]⚠️  Email sending cancelled[/yellow]\n")
 
 def send_bulk_email():
-    """Send bulk emails from CSV
-    
-    Workflow:
-    1. Load contacts.csv
-    2. Parse CSV using csv.DictReader
-    3. Show contact preview table (numbered)
-    4. Get subject and message from user
-    5. Request confirmation with contact count
-    6. Send to each contact with progress bar
-    7. Track success/failed counts
-    8. Display detailed summary report
-    9. List any failed recipients
-    
-    CSV Format Expected:
-    - Header row: name,email
-    - Each row: Name,email@example.com
-    
-    Progress bar uses rich.progress.track().
-    Emails sent sequentially, not in parallel.
-    """
     console.print("\n[bold yellow]📨 Bulk Email Mode[/bold yellow]\n")
     
     try:
@@ -151,7 +116,6 @@ def send_bulk_email():
         console.print("[red]❌ No contacts found in contacts.csv[/red]\n")
         return
     
-    # Display contacts table with enhanced formatting
     table = Table(title="📋 Contacts to Send", border_style="blue")
     table.add_column("No.", style="yellow", width=5)
     table.add_column("Name", style="cyan", width=15)
@@ -176,7 +140,6 @@ def send_bulk_email():
         console.print("[red]❌ Message cannot be empty[/red]")
         return
     
-    # Confirmation with count
     if Confirm.ask(f"\n[yellow]Send email to {len(contacts)} contact(s)?[/yellow]"):
         console.print("\n[bold]🚀 Sending emails...[/bold]\n")
         
@@ -214,7 +177,6 @@ def send_bulk_email():
                 failed += 1
                 failed_list.append(email)
         
-        # Display detailed summary table
         summary_title = f"📊 Bulk Send Summary - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         summary = Table(title=summary_title, border_style="green")
         summary.add_column("Metric", style="blue", width=15)
@@ -231,7 +193,6 @@ def send_bulk_email():
         
         console.print(Panel(summary, border_style="green"))
         
-        # Show failed list if any
         if failed_list:
             console.print("\n[bold red]Failed Email Addresses:[/bold red]")
             for email in failed_list:
@@ -242,20 +203,6 @@ def send_bulk_email():
         console.print("[yellow]⚠️  Bulk email sending cancelled[/yellow]\n")
 
 def view_email_logs():
-    """Display email logs
-    
-    Shows formatted table of recent emails:
-    - Last 20 log entries displayed
-    - Columns: Timestamp, Recipient, Status
-    - Color-coded status (green/red)
-    - Summary statistics at bottom
-    
-    Log format parsed from email_log.txt:
-    [timestamp] | To: email | Status: ✅/❌ | Subject: ...
-    
-    Uses logger.view_logs() to retrieve entries.
-    Uses logger.get_log_summary() for statistics.
-    """
     console.print("\n[bold cyan]📜 Email Logs[/bold cyan]\n")
     
     logs = view_logs()
@@ -263,16 +210,13 @@ def view_email_logs():
         console.print("[yellow]⚠️  No logs found[/yellow]\n")
         return
     
-    # Create a formatted display of logs
     log_table = Table(title="📋 Recent Email Activity", border_style="blue")
     log_table.add_column("Timestamp", style="cyan", width=20)
     log_table.add_column("Recipient", style="green", width=25)
     log_table.add_column("Status", style="magenta", width=12)
     
-    # Parse and display last 20 logs
     for log_line in logs[-20:]:
         try:
-            # Parse log format: [timestamp] | To: email | Status: status | Subject: subject
             if "[" in log_line and "]" in log_line:
                 timestamp = log_line[1:log_line.index("]")]
                 
@@ -297,7 +241,6 @@ def view_email_logs():
     
     console.print(log_table)
     
-    # Display summary stats
     stats = get_log_summary()
     console.print(f"\n[bold cyan]📊 Log Statistics:[/bold cyan]")
     console.print(f"  • [green]Total Successful:[/green] {stats['success']}")
@@ -306,19 +249,6 @@ def view_email_logs():
     console.print()
 
 def clear_email_logs():
-    """Clear logs with confirmation
-    
-    Prevents accidental data loss by requesting
-    user confirmation before deleting email_log.txt.
-    
-    Process:
-    1. Show warning message in red
-    2. Request confirmation
-    3. If yes: call logger.clear_logs() and show success
-    4. If no: show cancellation message
-    
-    Uses rich.prompt.Confirm for safe confirmation.
-    """
     console.print("\n[bold red]⚠️  Clear Email Logs[/bold red]\n")
     
     if Confirm.ask("[yellow]Are you sure you want to clear all logs?[/yellow]"):
@@ -328,19 +258,6 @@ def clear_email_logs():
         console.print("[yellow]Logs not cleared[/yellow]\n")
 
 def manage_auto_replies():
-    """Manage auto-reply rules
-    
-    Features:
-    1. View existing auto-reply rules
-    2. Add new auto-reply rule
-    3. View blacklisted emails
-    4. Add email to blacklist
-    
-    Workflow:
-    1. Show sub-menu with options
-    2. Route to appropriate function
-    3. Return to main menu
-    """
     engine = AutoReplyEngine()
     
     while True:
@@ -369,13 +286,6 @@ def manage_auto_replies():
             break
 
 def view_auto_replies(engine):
-    """Display all auto-reply rules in a formatted table
-    
-    Shows all configured auto-reply rules. Matching is keyword-based:
-    - Rule "Hello" matches: "Hello", "Re: Hello", "Re: Re: Hello", "Say Hello", etc.
-    - Rule "Support" matches: "Support", "Need Support", "Customer Support", etc.
-    - Matching is case-insensitive
-    """
     rules = engine.auto_replies
     
     if not rules:
@@ -398,7 +308,6 @@ def view_auto_replies(engine):
     console.print("[yellow]💡 Tip: Keywords are matched anywhere in the subject (case-insensitive)[/yellow]\n")
 
 def add_auto_reply(engine):
-    """Add a new auto-reply rule"""
     console.print("\n[bold cyan]➕ Add New Auto-Reply[/bold cyan]\n")
     
     subject = Prompt.ask("Enter email subject to match (e.g., 'Hello', 'Support')").strip()
@@ -417,7 +326,6 @@ def add_auto_reply(engine):
         console.print("[red]❌ Failed to add auto-reply[/red]\n")
 
 def view_blacklist(engine):
-    """Display all blacklisted emails"""
     blacklist = engine.blacklist
     
     if not blacklist:
@@ -435,7 +343,6 @@ def view_blacklist(engine):
     console.print(f"\n[cyan]Total Blacklisted: {len(blacklist)}[/cyan]\n")
 
 def add_to_blacklist(engine):
-    """Add an email to blacklist"""
     console.print("\n[bold cyan]➕ Add Email to Blacklist[/bold cyan]\n")
     
     email = Prompt.ask("Enter email address to blacklist").strip()
@@ -449,7 +356,6 @@ def add_to_blacklist(engine):
         console.print("[red]❌ Failed to add email to blacklist[/red]\n")
 
 def check_auto_reply_status():
-    """Display auto-reply statistics and status"""
     engine = AutoReplyEngine()
     stats = engine.get_stats()
     
@@ -467,37 +373,15 @@ def check_auto_reply_status():
     console.print()
 
 def monitor_incoming_emails():
-    """Monitor and process incoming emails with auto-replies
-    
-    Features:
-    - Optimized to check only last 1 hour of emails
-    - Connect to Gmail IMAP
-    - Fetch recent unread emails
-    - Process each email with auto-reply engine
-    - Display results in formatted table
-    
-    Workflow:
-    1. Connect to Gmail IMAP
-    2. Fetch unread emails from last 1 hour
-    3. Process each email with auto-reply engine
-    4. Display results in formatted table
-    5. Return to main menu
-    
-    Time optimization:
-    - Only checks emails from last 1 hour (much faster)
-    - Reduces processing time significantly
-    """
     console.print("\n[bold magenta]📧 Email Monitoring[/bold magenta]\n")
     
     reader = EmailReader()
     engine = AutoReplyEngine()
     
-    # Connect to Gmail
     if not reader.connect():
         console.print("[red]❌ Failed to connect to Gmail IMAP[/red]\n")
         return
     
-    # Fetch unread emails from last 1 hour (optimized)
     console.print("[cyan]Fetching unread emails from last 1 hour...[/cyan]")
     emails = reader.fetch_unread_emails(hours_back=1)
     
@@ -507,7 +391,6 @@ def monitor_incoming_emails():
         console.print("[yellow]⚠️  No unread emails from last 1 hour[/yellow]\n")
         return
     
-    # Process each email
     console.print(f"\n[cyan]Processing {len(emails)} email(s)...[/cyan]\n")
     
     results_table = Table(title="📧 Processing Results", border_style="blue")
@@ -519,10 +402,8 @@ def monitor_incoming_emails():
         sender = email.get("from", "Unknown")
         subject = email.get("subject", "No Subject")
         
-        # Extract email address
         sender_email = sender.split("<")[1].split(">")[0] if "<" in sender else sender
         
-        # Process with auto-reply engine
         success, message = engine.process_email(sender_email, subject)
         
         status = f"[green]✅ Replied[/green]" if success else f"[yellow]⏭️  Skipped[/yellow]"
@@ -533,33 +414,7 @@ def monitor_incoming_emails():
     console.print(results_table)
     console.print()
 
-
 def main():
-    """Main application loop
-    
-    Core application flow:
-    1. Display colorful banner
-    2. Loop until user exits:
-       - Show menu
-       - Get user choice (1-8)
-       - Route to appropriate function
-       - Return to menu
-    3. Handle keyboard interrupts (Ctrl+C)
-    4. Handle unexpected exceptions
-    
-    Menu routing:
-    1 → send_single_email()
-    2 → send_bulk_email()
-    3 → view_email_logs()
-    4 → clear_email_logs()
-    5 → manage_auto_replies()
-    6 → check_auto_reply_status()
-    7 → monitor_incoming_emails()
-    8 → exit
-    
-    Uses rich.prompt.Prompt for menu selection.
-    Catches KeyboardInterrupt for graceful exit.
-    """
     try:
         display_banner()
         
@@ -584,7 +439,6 @@ def main():
             elif choice == "8":
                 console.print("\n[bold cyan]👋 Thank you for using Email Automation Tool![/bold cyan]\n")
                 break
-    
     except KeyboardInterrupt:
         console.print("\n[yellow]⚠️  Application interrupted by user[/yellow]\n")
     except Exception as e:
@@ -592,4 +446,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

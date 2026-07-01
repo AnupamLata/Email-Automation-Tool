@@ -65,7 +65,47 @@ For detailed setup instructions, see [SETUP.md](SETUP.md)
 
 ---
 
-## 🎮 Usage
+## � Vercel Deployment
+
+This repository now includes a Vercel serverless endpoint at `/api/send_email`.
+
+### How to deploy
+
+1. Install the Vercel CLI: `npm install -g vercel`
+2. From the project root: `vercel --prod`
+3. Set these environment variables in Vercel:
+   - `EMAIL`
+   - `PASSWORD`
+   - `SMTP_SERVER` (default: `smtp.gmail.com`)
+   - `PORT` (default: `587`)
+
+### API usage
+
+Send a POST request to `https://<your-vercel-app>/api/send_email` with JSON:
+
+```json
+{
+  "receiver": "recipient@example.com",
+  "subject": "Test email",
+  "message": "Hello from Vercel"
+}
+```
+
+Response example:
+
+```json
+{
+  "status": "success",
+  "recipient": "recipient@example.com",
+  "timestamp": "2026-07-01 12:00:00"
+}
+```
+
+> Note: Vercel functions are stateless serverless invocations. This endpoint can send email on demand, but it is not a persistent 24x7 background process.
+
+---
+
+## �🎮 Usage
 
 ### Main Menu Options
 
