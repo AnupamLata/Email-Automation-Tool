@@ -1,0 +1,20 @@
+{
+  "auto_replies": [
+    {
+      "subject": "Hello",
+      "reply_message": "Hello! Thank you for reaching out. I will get back to you soon."
+    },
+    {
+      "subject": "Support",
+      "reply_message": "Thank you for contacting support. We will assist you shortly."
+    },
+    {
+      "subject": "Job Application",
+      "reply_message": "Thank you for applying! We will review your application and contact you soon."
+    },
+    {
+      "subject": "Inquiry",
+      "reply_message": "Thank you for your inquiry. We appreciate your interest and will respond shortly."
+    }
+  ]
+}

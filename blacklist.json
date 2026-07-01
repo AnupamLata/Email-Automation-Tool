@@ -1,0 +1,7 @@
+{
+  "blacklisted_emails": [
+    "noreply@example.com",
+    "automated@service.com",
+    "aniket@gmail.com"
+  ]
+}

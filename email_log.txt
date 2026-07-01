@@ -1,0 +1,8 @@
+[2026-06-29 11:28:30] | To: rahul@gmail.com | Status: [FAILED] | Subject: rtgyu | Message: Authentication failed. Check EMAIL and PASSWORD in .env
+[2026-06-29 11:28:34] | To: riya@gmail.com | Status: [FAILED] | Subject: rtgyu | Message: Authentication failed. Check EMAIL and PASSWORD in .env
+[2026-06-29 11:28:37] | To: aman@gmail.com | Status: [FAILED] | Subject: rtgyu | Message: Authentication failed. Check EMAIL and PASSWORD in .env
+[2026-06-29 11:46:15] | To: Anikety7905@gmail.com | Status: [SUCCESS] | Subject: jkefbeh
+[2026-06-29 11:47:45] | To: rahul@gmail.com | Status: [SUCCESS] | Subject: asfg
+[2026-06-29 11:47:50] | To: riya@gmail.com | Status: [SUCCESS] | Subject: asfg
+[2026-06-29 11:47:55] | To: aman@gmail.com | Status: [SUCCESS] | Subject: asfg
+[2026-06-29 12:29:13] | To: anikety7905@gmail.com | Status: [SUCCESS] | Subject: Auto-Reply
