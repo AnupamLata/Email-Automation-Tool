@@ -11,5 +11,10 @@
       "src": "/api/send_email",
       "dest": "/api/send_email.py"
     }
+    ,
+    {
+      "src": "/",
+      "dest": "/index.html"
+    }
   ]
 }

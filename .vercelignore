@@ -1,0 +1,15 @@
+# Ignore CLI and non-function Python files so Vercel doesn't treat them as serverless functions
+/cli_main.py
+/main.py
+/*.py
+!/api/*.py
+
+# Python environment and caches
+.venv
+venv
+__pycache__
+*.pyc
+
+# Local env files
+.env
+.env.*
