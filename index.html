@@ -5,143 +5,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A simple web page for the Email Automation Tool project with the main system features and email composer."
+      content="Professional web dashboard for sending single and bulk emails, managing contacts, reviewing logs, and maintaining automation rules."
     />
-    <title>Email Automation Tool</title>
+    <title>Email Automation System</title>
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Email Automation Tool</p>
-          <h1>Simple web page for the full email system.</h1>
-          <p class="hero-text">
-            This page shows the main working parts of the project and gives you a clean browser interface for sending emails.
-          </p>
-
-          <div class="hero-pills">
-            <span>Single email</span>
-            <span>Bulk email</span>
-            <span>Logs and auto-replies</span>
-          </div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Email Automation System</p>
+          <h1>Mail Operations Dashboard</h1>
         </div>
-
-        <aside class="hero-card">
-          <p class="card-label">Project summary</p>
-          <strong>Working modules</strong>
-          <p>
-            The system includes email sending, bulk sending, log viewing, auto-reply handling, blacklist checks, and inbox monitoring.
-          </p>
-          <div class="card-grid">
-            <div>
-              <span>Email flow</span>
-              <strong>Send</strong>
-            </div>
-            <div>
-              <span>Project type</span>
-              <strong>Web + CLI</strong>
-            </div>
-          </div>
-        </aside>
+        <div id="configBadge" class="status-badge is-loading">Checking setup</div>
       </header>
 
-      <section class="features-strip">
-        <article class="feature-card">
-          <span>1</span>
-          <h2>Send Single Email</h2>
-          <p>Send one email with validation, preview, and success or failure feedback.</p>
+      <section class="metrics-grid" aria-label="System metrics">
+        <article class="metric-card metric-action" tabindex="0" role="button" data-tab-target="contactsPanel">
+          <span>Contacts</span>
+          <strong id="contactCount">0</strong>
         </article>
-        <article class="feature-card">
-          <span>2</span>
-          <h2>Send Bulk Email</h2>
-          <p>Load contacts from CSV, show recipients, and send to multiple addresses.</p>
+        <article class="metric-card metric-action" tabindex="0" role="button" data-tab-target="logsPanel">
+          <span>Sent</span>
+          <strong id="successCount">0</strong>
         </article>
-        <article class="feature-card">
-          <span>3</span>
-          <h2>Email Logs</h2>
-          <p>View sent messages, timestamps, status, and summary counts.</p>
+        <article class="metric-card metric-action" tabindex="0" role="button" data-tab-target="logsPanel">
+          <span>Failed</span>
+          <strong id="failedCount">0</strong>
         </article>
-        <article class="feature-card">
-          <span>4</span>
-          <h2>Auto-Replies</h2>
-          <p>Manage reply rules, blacklists, and incoming email processing.</p>
+        <article class="metric-card metric-action" tabindex="0" role="button" data-tab-target="automationPanel">
+          <span>Rules</span>
+          <strong id="ruleCount">0</strong>
         </article>
       </section>
 
-      <main class="workspace">
-        <section class="composer-panel">
-          <div class="section-heading">
-            <p class="eyebrow">Live email form</p>
-            <h2>Try the send email screen</h2>
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Project overview</p>
+          <h2>One dashboard for the whole email system.</h2>
+          <p>
+            Manage single emails, bulk sends, contact lists, logs, and automation rules from one clean browser page.
+          </p>
+          <div class="hero-actions">
+            <button class="ghost-button" type="button" data-jump-tab="composePanel">Compose</button>
+            <button class="ghost-button" type="button" data-jump-tab="bulkPanel">Bulk send</button>
+            <button class="ghost-button" type="button" data-jump-tab="automationPanel">Automation</button>
+            <button class="ghost-button" type="button" data-jump-tab="logsPanel">Logs</button>
+          </div>
+        </div>
+
+        <div class="hero-stack">
+          <article class="hero-tile">
+            <span>Live</span>
+            <strong>Working forms</strong>
+            <p>Single email, bulk email, contacts, blacklist, and reply rules are all editable here.</p>
+          </article>
+          <article class="hero-tile accent">
+            <span>Fast</span>
+            <strong>Quick actions</strong>
+            <p>Jump straight to the section you need and use the buttons inside each panel.</p>
+          </article>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Dashboard sections">
+        <button class="tab-button is-active" type="button" data-tab="composePanel">Compose</button>
+        <button class="tab-button" type="button" data-tab="bulkPanel">Bulk</button>
+        <button class="tab-button" type="button" data-tab="contactsPanel">Contacts</button>
+        <button class="tab-button" type="button" data-tab="automationPanel">Automation</button>
+        <button class="tab-button" type="button" data-tab="logsPanel">Logs</button>
+      </nav>
+
+      <main class="dashboard-grid">
+        <section class="panel panel-primary tab-panel is-active" id="composePanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Single email</p>
+              <h2>Compose Message</h2>
+            </div>
+            <select id="templateSelect" aria-label="Message template">
+              <option value="">Template</option>
+              <option value="followup">Follow up</option>
+              <option value="update">Project update</option>
+              <option value="support">Support reply</option>
+              <option value="intro">Introduction</option>
+            </select>
           </div>
 
-          <form id="sendForm" class="email-form">
+          <form id="sendForm" class="stacked-form">
             <label>
               Recipient email
-              <input id="receiver" type="email" placeholder="recipient@example.com" required />
+              <input id="receiver" type="email" autocomplete="email" placeholder="recipient@example.com" required />
             </label>
-
             <label>
               Subject
               <input id="subject" type="text" placeholder="Project update" required />
             </label>
-
             <label>
               Message
-              <textarea id="message" rows="10" placeholder="Write your message here" required></textarea>
+              <textarea id="message" rows="11" placeholder="Write a clear, helpful message..." required></textarea>
             </label>
-
-            <div class="quick-actions" aria-label="Message templates">
-              <button type="button" data-template="followup">Follow up</button>
-              <button type="button" data-template="update">Project update</button>
-              <button type="button" data-template="support">Support reply</button>
-            </div>
-
-            <div class="actions">
-              <button id="sendBtn" type="submit">Send email</button>
+            <div class="form-footer">
+              <div id="composeMeta" class="input-meta">0 characters</div>
+              <button id="sendBtn" class="primary-button" type="submit">Send Email</button>
             </div>
           </form>
         </section>
 
-        <aside class="status-panel">
-          <section class="status-card">
-            <div class="section-heading">
-              <p class="eyebrow">System flow</p>
-              <h2>How the project works</h2>
+        <aside class="side-column">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">System</p>
+                <h2>Setup Status</h2>
+              </div>
+              <button id="refreshBtn" class="ghost-button" type="button">Refresh</button>
             </div>
-
-            <div id="status" class="status idle" aria-live="polite">
-              Fill out the form and send a test email.
-            </div>
+            <div id="statusList" class="status-list"></div>
           </section>
 
-          <section class="status-card muted-card">
-            <p class="eyebrow">What is included</p>
-            <ol>
-              <li>Send single emails with input validation.</li>
-              <li>Send bulk emails from contacts.csv.</li>
-              <li>View logs, clear logs, manage replies, blacklist emails, and monitor inbox messages.</li>
-            </ol>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Recent</p>
+                <h2>Activity</h2>
+              </div>
+            </div>
+            <div id="recentActivity" class="activity-list empty-state">No activity loaded yet.</div>
           </section>
         </aside>
+
+        <section class="panel panel-wide tab-panel" id="bulkPanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CSV recipients</p>
+              <h2>Bulk Campaign</h2>
+            </div>
+            <span id="selectedCount" class="small-badge">0 selected</span>
+          </div>
+          <div class="split-grid">
+            <form id="bulkForm" class="stacked-form">
+              <label>
+                Campaign subject
+                <input id="bulkSubject" type="text" placeholder="Monthly update" required />
+              </label>
+              <label>
+                Campaign message
+                <textarea id="bulkMessage" rows="9" placeholder="Write one message for selected contacts..." required></textarea>
+              </label>
+              <div class="form-footer">
+                <button id="selectAllBtn" class="ghost-button" type="button">Select All</button>
+                <button id="bulkSendBtn" class="primary-button" type="submit">Send Bulk Email</button>
+              </div>
+            </form>
+            <div id="bulkRecipients" class="recipient-list empty-state">Loading contacts...</div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide tab-panel" id="contactsPanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Address book</p>
+              <h2>Contacts</h2>
+            </div>
+          </div>
+          <div class="split-grid">
+            <form id="contactForm" class="stacked-form">
+              <label>
+                Name
+                <input id="contactName" type="text" placeholder="Rahul" />
+              </label>
+              <label>
+                Email
+                <input id="contactEmail" type="email" placeholder="rahul@example.com" required />
+              </label>
+              <button class="primary-button" type="submit">Add Contact</button>
+            </form>
+            <div id="contactsList" class="data-list empty-state">Loading contacts...</div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide tab-panel" id="automationPanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Reply engine</p>
+              <h2>Automation Rules</h2>
+            </div>
+          </div>
+          <div class="automation-grid">
+            <form id="replyForm" class="stacked-form">
+              <h3>Add Auto-Reply</h3>
+              <label>
+                Matching subject
+                <input id="replySubject" type="text" placeholder="Support" required />
+              </label>
+              <label>
+                Reply message
+                <textarea id="replyMessage" rows="5" placeholder="Thank you for reaching out..." required></textarea>
+              </label>
+              <button class="primary-button" type="submit">Save Reply Rule</button>
+            </form>
+            <form id="blacklistForm" class="stacked-form">
+              <h3>Add Blacklist Email</h3>
+              <label>
+                Email address
+                <input id="blacklistEmail" type="email" placeholder="noreply@example.com" required />
+              </label>
+              <button class="primary-button" type="submit">Block Sender</button>
+            </form>
+          </div>
+          <div class="automation-grid">
+            <div>
+              <h3>Current Replies</h3>
+              <div id="replyList" class="data-list empty-state">Loading rules...</div>
+            </div>
+            <div>
+              <h3>Blacklist</h3>
+              <div id="blacklistList" class="data-list empty-state">Loading blocked senders...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide tab-panel" id="logsPanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Delivery history</p>
+              <h2>Email Logs</h2>
+            </div>
+            <button id="clearLogsBtn" class="danger-button" type="button">Clear Logs</button>
+          </div>
+          <div id="logsList" class="log-list empty-state">Loading logs...</div>
+        </section>
       </main>
 
-      <section class="system-panel">
-        <div class="section-heading">
-          <p class="eyebrow">System modules</p>
-          <h2>All working parts in the project</h2>
-        </div>
-
-        <div class="module-grid">
-          <div class="module-item">Email sender</div>
-          <div class="module-item">Email reader</div>
-          <div class="module-item">Auto reply engine</div>
-          <div class="module-item">Log manager</div>
-          <div class="module-item">Blacklist support</div>
-          <div class="module-item">CSV contacts</div>
-        </div>
-      </section>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>
 
     <script src="/static/app.js"></script>
