@@ -24,6 +24,7 @@ from api.project_data import (
 ROOT_DIR = Path(__file__).resolve().parent
 STATIC_DIR = ROOT_DIR / "static"
 INDEX_FILE = ROOT_DIR / "index.html"
+ENV_FILE = ROOT_DIR / ".env"
 
 
 def _send_file(request, path):
@@ -43,6 +44,33 @@ def _send_file(request, path):
 
 def _write_error(request, status_code, message):
     write_json_response(request, status_code, {"error": message})
+
+
+def _read_env_values():
+    values = {}
+    if not ENV_FILE.exists():
+        return values
+
+    for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip()
+    return values
+
+
+def _write_env_values(values):
+    lines = [
+        "# Email Configuration",
+        "# Saved from the web dashboard",
+        f"EMAIL={values['EMAIL']}",
+        f"PASSWORD={values['PASSWORD']}",
+        f"SMTP_SERVER={values['SMTP_SERVER']}",
+        f"PORT={values['PORT']}",
+        "",
+    ]
+    ENV_FILE.write_text("\n".join(lines), encoding="utf-8")
 
 
 class handler(BaseHTTPRequestHandler):
@@ -104,6 +132,20 @@ class handler(BaseHTTPRequestHandler):
 
         if self.path == "/api/send_email":
             write_json_response(self, 200, {"status": "ok", "message": "Email API is running"})
+            return
+
+        if self.path == "/api/settings":
+            current = _read_env_values()
+            write_json_response(
+                self,
+                200,
+                {
+                    "email": current.get("EMAIL", ""),
+                    "smtpServer": current.get("SMTP_SERVER", "smtp.gmail.com"),
+                    "port": current.get("PORT", "587"),
+                    "configured": bool(current.get("EMAIL")) and bool(current.get("PASSWORD")),
+                },
+            )
             return
 
         _send_file(self, INDEX_FILE)
@@ -270,6 +312,53 @@ class handler(BaseHTTPRequestHandler):
                 _write_error(self, 400, "Unknown automation action")
             except Exception as exc:
                 _write_error(self, 500, str(exc))
+            return
+
+        if self.path == "/api/settings":
+            try:
+                body = read_json_body(self)
+            except json.JSONDecodeError:
+                _write_error(self, 400, "Invalid JSON body")
+                return
+
+            email = (body.get("email") or "").strip()
+            password = (body.get("password") or "").strip()
+            smtp_server = (body.get("smtpServer") or "smtp.gmail.com").strip() or "smtp.gmail.com"
+            port = str((body.get("port") or "587")).strip() or "587"
+
+            current = _read_env_values()
+            if not password:
+                password = current.get("PASSWORD", "")
+
+            if not email or not password:
+                _write_error(self, 400, "EMAIL and PASSWORD are required to save settings")
+                return
+
+            _write_env_values(
+                {
+                    "EMAIL": email,
+                    "PASSWORD": password,
+                    "SMTP_SERVER": smtp_server,
+                    "PORT": port,
+                }
+            )
+
+            os.environ["EMAIL"] = email
+            os.environ["PASSWORD"] = password
+            os.environ["SMTP_SERVER"] = smtp_server
+            os.environ["PORT"] = port
+
+            write_json_response(
+                self,
+                200,
+                {
+                    "status": "saved",
+                    "configured": True,
+                    "email": email,
+                    "smtpServer": smtp_server,
+                    "port": port,
+                },
+            )
             return
 
         _write_error(self, 404, "Not found")

@@ -127,6 +127,37 @@
           <section class="panel">
             <div class="panel-heading">
               <div>
+                <p class="eyebrow">Email account</p>
+                <h2>SMTP Settings</h2>
+              </div>
+            </div>
+            <form id="settingsForm" class="stacked-form">
+              <label>
+                Email address
+                <input id="settingsEmail" type="email" placeholder="your_email@gmail.com" required />
+              </label>
+              <label>
+                Password or app password
+                <input id="settingsPassword" type="password" placeholder="your app password" />
+              </label>
+              <label>
+                SMTP server
+                <input id="settingsSmtp" type="text" placeholder="smtp.gmail.com" />
+              </label>
+              <label>
+                Port
+                <input id="settingsPort" type="number" min="1" step="1" placeholder="587" />
+              </label>
+              <div class="form-footer settings-footer">
+                <div id="settingsMeta" class="input-meta">Save your email credentials to enable sending.</div>
+                <button id="saveSettingsBtn" class="primary-button" type="submit">Save Settings</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
                 <p class="eyebrow">Recent</p>
                 <h2>Activity</h2>
               </div>

@@ -1,8 +1,9 @@
 import smtplib
 import re
+import os
 from datetime import datetime
 from email.message import EmailMessage
-from config import EMAIL, PASSWORD, SMTP_SERVER, PORT
+from config import PORT, SMTP_SERVER
 from logger import log_email_send
 
 def validate_email(email):
@@ -73,7 +74,12 @@ def send_email(receiver, subject, message):
         "message": None
     }
 
-    if not EMAIL or not PASSWORD:
+    email_account = os.getenv("EMAIL")
+    email_password = os.getenv("PASSWORD")
+    smtp_server = os.getenv("SMTP_SERVER", SMTP_SERVER)
+    smtp_port = int(os.getenv("PORT", PORT))
+
+    if not email_account or not email_password:
         error_msg = "EMAIL and PASSWORD environment variables are required"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
@@ -108,15 +114,15 @@ def send_email(receiver, subject, message):
         return False, metadata
 
     email = EmailMessage()
-    email["From"] = EMAIL
+    email["From"] = email_account
     email["To"] = receiver
     email["Subject"] = subject
     email.set_content(message)
 
     try:
-        with smtplib.SMTP(SMTP_SERVER, PORT) as smtp:
+        with smtplib.SMTP(smtp_server, smtp_port) as smtp:
             smtp.starttls()
-            smtp.login(EMAIL, PASSWORD)
+            smtp.login(email_account, email_password)
             smtp.send_message(email)
 
         metadata["status"] = "SUCCESS"

@@ -151,7 +151,13 @@ const elements = {
   replyList: $('#replyList'),
   blacklistList: $('#blacklistList'),
   logsList: $('#logsList'),
-  composeMeta: $('#composeMeta')
+  composeMeta: $('#composeMeta'),
+  settingsForm: $('#settingsForm'),
+  settingsEmail: $('#settingsEmail'),
+  settingsPassword: $('#settingsPassword'),
+  settingsSmtp: $('#settingsSmtp'),
+  settingsPort: $('#settingsPort'),
+  settingsMeta: $('#settingsMeta')
 };
 
 function escapeHtml(value = '') {
@@ -178,6 +184,15 @@ async function api(path, options = {}) {
 
     if (path === '/api/status') {
       return { config: demoConfig(), counts: demoCounts() };
+    }
+
+    if (path === '/api/settings' && (!options.method || options.method === 'GET')) {
+      return {
+        email: 'demo@example.com',
+        smtpServer: 'Demo browser mode',
+        port: 'local',
+        configured: true
+      };
     }
 
     if (path === '/api/contacts' && (!options.method || options.method === 'GET')) {
@@ -404,6 +419,16 @@ function renderStatus(config = {}) {
   `).join('');
 }
 
+function populateSettings(settings = {}) {
+  elements.settingsEmail.value = settings.email || '';
+  elements.settingsPassword.value = '';
+  elements.settingsSmtp.value = settings.smtpServer || 'smtp.gmail.com';
+  elements.settingsPort.value = settings.port || '587';
+  elements.settingsMeta.textContent = settings.configured
+    ? 'Settings loaded. Leave password empty to keep the current one.'
+    : 'Enter your email and password to enable sending.';
+}
+
 function renderContacts() {
   if (!state.contacts.length) {
     elements.contactsList.textContent = 'No contacts found in contacts.csv.';
@@ -506,6 +531,7 @@ async function loadDashboard() {
       api('/api/logs'),
       api('/api/automation')
     ]);
+    const settings = await api('/api/settings');
 
     state.contacts = contacts.contacts || [];
     const currentSelections = new Set(state.selectedRecipients);
@@ -523,6 +549,7 @@ async function loadDashboard() {
 
     renderMetrics(status.counts);
     renderStatus(status.config);
+    populateSettings(settings);
     renderContacts();
     renderAutomation();
     renderLogs(logs);
@@ -532,9 +559,10 @@ async function loadDashboard() {
 }
 
 async function refreshLogsAndStatus() {
-  const [status, logs] = await Promise.all([api('/api/status'), api('/api/logs')]);
+  const [status, logs, settings] = await Promise.all([api('/api/status'), api('/api/logs'), api('/api/settings')]);
   renderMetrics(status.counts);
   renderStatus(status.config);
+  populateSettings(settings);
   renderLogs(logs);
 }
 
@@ -706,6 +734,37 @@ elements.blacklistForm.addEventListener('submit', async (event) => {
     showToast('Sender blocked.', 'success');
   } catch (error) {
     showToast(error.message, 'error');
+  }
+});
+
+elements.settingsForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = $('#saveSettingsBtn');
+  setButtonLoading(button, true, 'Saving...');
+
+  try {
+    const data = await api('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: elements.settingsEmail.value.trim(),
+        password: elements.settingsPassword.value,
+        smtpServer: elements.settingsSmtp.value.trim(),
+        port: elements.settingsPort.value.trim()
+      })
+    });
+
+    elements.settingsPassword.value = '';
+    elements.settingsMeta.textContent = 'Settings saved. You can send email now.';
+    showToast('SMTP settings saved.', 'success');
+    await refreshLogsAndStatus();
+    if (data.configured) {
+      elements.configBadge.textContent = 'SMTP ready';
+      elements.configBadge.className = 'status-badge is-ready';
+    }
+  } catch (error) {
+    showToast(error.message, 'error');
+  } finally {
+    setButtonLoading(button, false);
   }
 });
 
