@@ -4,14 +4,53 @@
     {
       "src": "api/send_email.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/status.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/contacts.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/logs.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/automation.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/bulk_send.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/send_email",
       "dest": "/api/send_email.py"
-    }
-    ,
+    },
+    {
+      "src": "/api/status",
+      "dest": "/api/status.py"
+    },
+    {
+      "src": "/api/contacts",
+      "dest": "/api/contacts.py"
+    },
+    {
+      "src": "/api/logs",
+      "dest": "/api/logs.py"
+    },
+    {
+      "src": "/api/automation",
+      "dest": "/api/automation.py"
+    },
+    {
+      "src": "/api/bulk_send",
+      "dest": "/api/bulk_send.py"
+    },
     {
       "src": "/",
       "dest": "/index.html"
