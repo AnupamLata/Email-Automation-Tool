@@ -16,7 +16,10 @@ try:
     from rich.progress import track
     from rich.prompt import Prompt, Confirm
     from rich.syntax import Syntax
+    RICH_AVAILABLE = True
 except ImportError:
+    RICH_AVAILABLE = False
+
     class Console:
         def print(self, *args, **kwargs):
             print(*args)
@@ -108,8 +111,14 @@ def get_web_app_url():
 
 def display_web_app_link():
     web_app_url = get_web_app_url()
-    console.print("\n[bold cyan]Web page:[/bold cyan] [underline blue]{}[/underline blue]".format(web_app_url))
-    console.print("[dim]Open this in your browser to use the web version of the app.[/dim]\n")
+    if RICH_AVAILABLE:
+        console.print(f"\n[bold cyan]Web page:[/bold cyan] [underline blue]{web_app_url}[/underline blue]")
+        console.print("[dim]Open this in your browser to use the web version of the app.[/dim]\n")
+    else:
+        print()
+        print(f"Web page: {web_app_url}")
+        print("Open this in your browser to use the web version of the app.")
+        print()
 
 def display_banner():
     """Display colorful banner
@@ -512,6 +521,10 @@ def monitor_incoming_emails():
 def main():
     try:
         display_web_app_link()
+
+        if not RICH_AVAILABLE:
+            return
+
         display_banner()
         
         while True:
