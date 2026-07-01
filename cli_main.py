@@ -106,7 +106,7 @@ def get_web_app_url():
             vercel_url = f"https://{vercel_url}"
         return vercel_url
 
-    return "http://localhost:8000/index.html"
+    return "http://localhost:8001/index.html"
 
 
 def display_web_app_link():

@@ -5,7 +5,8 @@ const state = {
   automation: { auto_replies: [], blacklisted_emails: [] }
 };
 
-const DEMO_MODE = ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:';
+const URL_PARAMS = new URLSearchParams(window.location.search);
+const DEMO_MODE = URL_PARAMS.get('demo') === '1' || window.location.protocol === 'file:';
 const DEMO_STORAGE_KEY = 'email-automation-system-demo-state';
 const DEFAULT_DEMO_STATE = {
   contacts: [
@@ -327,7 +328,12 @@ async function api(path, options = {}) {
     }
   });
 
-  const data = response.status === 204 ? {} : await response.json();
+  const contentType = response.headers.get('content-type') || '';
+  const data = response.status === 204
+    ? {}
+    : contentType.includes('application/json')
+      ? await response.json()
+      : { error: await response.text() };
   if (!response.ok) {
     throw new Error(data.error || data.message || 'Request failed');
   }
