@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A modern web interface for sending and managing automated emails from Vercel."
+      content="A simple web page for the Email Automation Tool project with the main system features and email composer."
     />
     <title>Email Automation Tool</title>
     <link rel="stylesheet" href="/static/style.css" />
@@ -14,43 +14,66 @@
     <div class="page-shell">
       <header class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Vercel-ready email automation</p>
-          <h1>Send polished emails from a proper web interface.</h1>
+          <p class="eyebrow">Email Automation Tool</p>
+          <h1>Simple web page for the full email system.</h1>
           <p class="hero-text">
-            Compose, preview, and send email messages from a responsive browser app backed by a Python serverless function.
+            This page shows the main working parts of the project and gives you a clean browser interface for sending emails.
           </p>
 
           <div class="hero-pills">
-            <span>Fast form validation</span>
-            <span>Serverless API</span>
-            <span>Mobile friendly</span>
+            <span>Single email</span>
+            <span>Bulk email</span>
+            <span>Logs and auto-replies</span>
           </div>
         </div>
 
         <aside class="hero-card">
-          <p class="card-label">Deployment target</p>
-          <strong>Vercel</strong>
+          <p class="card-label">Project summary</p>
+          <strong>Working modules</strong>
           <p>
-            The page is served at the site root and sends messages through <code>/api/send_email</code>.
+            The system includes email sending, bulk sending, log viewing, auto-reply handling, blacklist checks, and inbox monitoring.
           </p>
           <div class="card-grid">
             <div>
-              <span>API</span>
-              <strong>POST</strong>
+              <span>Email flow</span>
+              <strong>Send</strong>
             </div>
             <div>
-              <span>Frontend</span>
-              <strong>Static</strong>
+              <span>Project type</span>
+              <strong>Web + CLI</strong>
             </div>
           </div>
         </aside>
       </header>
 
+      <section class="features-strip">
+        <article class="feature-card">
+          <span>1</span>
+          <h2>Send Single Email</h2>
+          <p>Send one email with validation, preview, and success or failure feedback.</p>
+        </article>
+        <article class="feature-card">
+          <span>2</span>
+          <h2>Send Bulk Email</h2>
+          <p>Load contacts from CSV, show recipients, and send to multiple addresses.</p>
+        </article>
+        <article class="feature-card">
+          <span>3</span>
+          <h2>Email Logs</h2>
+          <p>View sent messages, timestamps, status, and summary counts.</p>
+        </article>
+        <article class="feature-card">
+          <span>4</span>
+          <h2>Auto-Replies</h2>
+          <p>Manage reply rules, blacklists, and incoming email processing.</p>
+        </article>
+      </section>
+
       <main class="workspace">
         <section class="composer-panel">
           <div class="section-heading">
-            <p class="eyebrow">Compose message</p>
-            <h2>New email</h2>
+            <p class="eyebrow">Live email form</p>
+            <h2>Try the send email screen</h2>
           </div>
 
           <form id="sendForm" class="email-form">
@@ -84,8 +107,8 @@
         <aside class="status-panel">
           <section class="status-card">
             <div class="section-heading">
-              <p class="eyebrow">Live status</p>
-              <h2>Delivery response</h2>
+              <p class="eyebrow">System flow</p>
+              <h2>How the project works</h2>
             </div>
 
             <div id="status" class="status idle" aria-live="polite">
@@ -94,15 +117,31 @@
           </section>
 
           <section class="status-card muted-card">
-            <p class="eyebrow">How it works</p>
+            <p class="eyebrow">What is included</p>
             <ol>
-              <li>Open the web page in your browser.</li>
-              <li>Enter the recipient, subject, and message.</li>
-              <li>The browser posts JSON to the Vercel function.</li>
+              <li>Send single emails with input validation.</li>
+              <li>Send bulk emails from contacts.csv.</li>
+              <li>View logs, clear logs, manage replies, blacklist emails, and monitor inbox messages.</li>
             </ol>
           </section>
         </aside>
       </main>
+
+      <section class="system-panel">
+        <div class="section-heading">
+          <p class="eyebrow">System modules</p>
+          <h2>All working parts in the project</h2>
+        </div>
+
+        <div class="module-grid">
+          <div class="module-item">Email sender</div>
+          <div class="module-item">Email reader</div>
+          <div class="module-item">Auto reply engine</div>
+          <div class="module-item">Log manager</div>
+          <div class="module-item">Blacklist support</div>
+          <div class="module-item">CSV contacts</div>
+        </div>
+      </section>
     </div>
 
     <script src="/static/app.js"></script>

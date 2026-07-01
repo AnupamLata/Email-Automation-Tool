@@ -62,7 +62,7 @@ form.addEventListener('submit', async (e) => {
   }
 
   setSendingState(true);
-  setStatus('Sending email through the Vercel function...', 'sending');
+  setStatus('Sending email through the project API...', 'sending');
 
   try {
     const res = await fetch('/api/send_email', {
