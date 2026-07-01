@@ -2,37 +2,108 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Email Automation Tool — Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A modern web interface for sending and managing automated emails from Vercel."
+    />
+    <title>Email Automation Tool</title>
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
-    <main class="container">
-      <h1>Email Automation Tool</h1>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Vercel-ready email automation</p>
+          <h1>Send polished emails from a proper web interface.</h1>
+          <p class="hero-text">
+            Compose, preview, and send email messages from a responsive browser app backed by a Python serverless function.
+          </p>
 
-      <form id="sendForm">
-        <label>Recipient email
-          <input id="receiver" type="email" placeholder="recipient@example.com" required />
-        </label>
-
-        <label>Subject
-          <input id="subject" type="text" placeholder="Subject" required />
-        </label>
-
-        <label>Message
-          <textarea id="message" rows="6" placeholder="Write your message here" required></textarea>
-        </label>
-
-        <div class="actions">
-          <button id="sendBtn" type="submit">Send Email</button>
+          <div class="hero-pills">
+            <span>Fast form validation</span>
+            <span>Serverless API</span>
+            <span>Mobile friendly</span>
+          </div>
         </div>
-      </form>
 
-      <div id="status" aria-live="polite"></div>
-      <footer>
-        <small>This page calls the serverless function at <code>/api/send_email</code>.</small>
-      </footer>
-    </main>
+        <aside class="hero-card">
+          <p class="card-label">Deployment target</p>
+          <strong>Vercel</strong>
+          <p>
+            The page is served at the site root and sends messages through <code>/api/send_email</code>.
+          </p>
+          <div class="card-grid">
+            <div>
+              <span>API</span>
+              <strong>POST</strong>
+            </div>
+            <div>
+              <span>Frontend</span>
+              <strong>Static</strong>
+            </div>
+          </div>
+        </aside>
+      </header>
+
+      <main class="workspace">
+        <section class="composer-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Compose message</p>
+            <h2>New email</h2>
+          </div>
+
+          <form id="sendForm" class="email-form">
+            <label>
+              Recipient email
+              <input id="receiver" type="email" placeholder="recipient@example.com" required />
+            </label>
+
+            <label>
+              Subject
+              <input id="subject" type="text" placeholder="Project update" required />
+            </label>
+
+            <label>
+              Message
+              <textarea id="message" rows="10" placeholder="Write your message here" required></textarea>
+            </label>
+
+            <div class="quick-actions" aria-label="Message templates">
+              <button type="button" data-template="followup">Follow up</button>
+              <button type="button" data-template="update">Project update</button>
+              <button type="button" data-template="support">Support reply</button>
+            </div>
+
+            <div class="actions">
+              <button id="sendBtn" type="submit">Send email</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="status-panel">
+          <section class="status-card">
+            <div class="section-heading">
+              <p class="eyebrow">Live status</p>
+              <h2>Delivery response</h2>
+            </div>
+
+            <div id="status" class="status idle" aria-live="polite">
+              Fill out the form and send a test email.
+            </div>
+          </section>
+
+          <section class="status-card muted-card">
+            <p class="eyebrow">How it works</p>
+            <ol>
+              <li>Open the web page in your browser.</li>
+              <li>Enter the recipient, subject, and message.</li>
+              <li>The browser posts JSON to the Vercel function.</li>
+            </ol>
+          </section>
+        </aside>
+      </main>
+    </div>
 
     <script src="/static/app.js"></script>
   </body>
