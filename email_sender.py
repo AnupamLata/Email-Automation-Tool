@@ -3,8 +3,24 @@ import re
 import os
 from datetime import datetime
 from email.message import EmailMessage
-from config import PORT, SMTP_SERVER
+from config import SMTP_PORT, SMTP_SERVER
 from logger import log_email_send
+
+
+def normalize_recipients(receiver):
+    if isinstance(receiver, (list, tuple, set)):
+        recipients = [str(item).strip() for item in receiver if str(item).strip()]
+        return recipients
+
+    if not receiver:
+        return []
+
+    text = str(receiver).strip()
+    if not text:
+        return []
+
+    return [part.strip() for part in re.split(r"[,;\n]+", text) if part.strip()]
+
 
 def validate_email(email):
     """Validate email format using regex pattern
@@ -26,8 +42,14 @@ def validate_email(email):
         validate_email('invalid@')             # False
         validate_email('no-at-sign.com')       # False
     """
+    if not email:
+        return False
+
+    if isinstance(email, (list, tuple, set)):
+        return False
+
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
+    return re.match(pattern, str(email).strip()) is not None
 
 def send_email(receiver, subject, message):
     """Send email via SMTP with validation and error handling
@@ -77,7 +99,7 @@ def send_email(receiver, subject, message):
     email_account = os.getenv("EMAIL")
     email_password = os.getenv("PASSWORD")
     smtp_server = os.getenv("SMTP_SERVER", SMTP_SERVER)
-    smtp_port = int(os.getenv("PORT", PORT))
+    smtp_port = int(os.getenv("PORT", SMTP_PORT))
 
     if not email_account or not email_password:
         error_msg = "EMAIL and PASSWORD environment variables are required"
@@ -87,9 +109,18 @@ def send_email(receiver, subject, message):
         log_email_send(receiver, subject, "[FAILED]", error_msg)
         return False, metadata
     
-    # Validate receiver email
-    if not validate_email(receiver):
+    recipients = normalize_recipients(receiver)
+    if not recipients:
         error_msg = f"Invalid email format: {receiver}"
+        print(f"[FAILED] {error_msg}")
+        metadata["status"] = "FAILED"
+        metadata["message"] = error_msg
+        log_email_send(receiver, subject, "[FAILED]", error_msg)
+        return False, metadata
+
+    invalid_recipients = [recipient for recipient in recipients if not validate_email(recipient)]
+    if invalid_recipients:
+        error_msg = f"Invalid email format: {', '.join(invalid_recipients)}"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
         metadata["message"] = error_msg
@@ -113,41 +144,65 @@ def send_email(receiver, subject, message):
         log_email_send(receiver, subject, "[FAILED]", error_msg)
         return False, metadata
 
-    email = EmailMessage()
-    email["From"] = email_account
-    email["To"] = receiver
-    email["Subject"] = subject
-    email.set_content(message)
+    sent_recipients = []
+    failed_recipients = []
 
     try:
         with smtplib.SMTP(smtp_server, smtp_port) as smtp:
             smtp.starttls()
             smtp.login(email_account, email_password)
-            smtp.send_message(email)
 
-        metadata["status"] = "SUCCESS"
-        print(f"[SUCCESS] Email sent to {receiver}")
-        log_email_send(receiver, subject, "[SUCCESS]")
+            for recipient in recipients:
+                email = EmailMessage()
+                email["From"] = email_account
+                email["To"] = recipient
+                email["Subject"] = subject
+                email.set_content(message)
+
+                try:
+                    smtp.send_message(email)
+                    sent_recipients.append(recipient)
+                    log_email_send(recipient, subject, "[SUCCESS]")
+                except Exception as exc:
+                    failed_recipients.append((recipient, str(exc)))
+                    log_email_send(recipient, subject, "[FAILED]", str(exc))
+
+        metadata["status"] = "SUCCESS" if not failed_recipients else "FAILED"
+        metadata["recipient"] = ", ".join(recipients)
+        metadata["recipients"] = recipients
+        metadata["sent_recipients"] = sent_recipients
+        metadata["failed_recipients"] = [recipient for recipient, _ in failed_recipients]
+
+        if failed_recipients:
+            error_msg = f"Failed to send to: {', '.join(metadata['failed_recipients'])}"
+            metadata["message"] = error_msg
+            print(f"[FAILED] {error_msg}")
+            return False, metadata
+
+        print(f"[SUCCESS] Email sent to {', '.join(recipients)}")
         return True, metadata
 
-    except smtplib.SMTPAuthenticationError as e:
+    except smtplib.SMTPAuthenticationError:
         error_msg = "Authentication failed. For Gmail, use a Google App Password and verify EMAIL/PASSWORD in .env"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
         metadata["message"] = error_msg
-        log_email_send(receiver, subject, "[FAILED]", error_msg)
+        for recipient in recipients:
+            log_email_send(recipient, subject, "[FAILED]", error_msg)
         return False, metadata
     except smtplib.SMTPException as e:
         error_msg = f"SMTP Error: {str(e)}"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
         metadata["message"] = error_msg
-        log_email_send(receiver, subject, "[FAILED]", error_msg)
+        for recipient in recipients:
+            log_email_send(recipient, subject, "[FAILED]", error_msg)
         return False, metadata
     except Exception as e:
         error_msg = f"Unexpected error: {str(e)}"
         print(f"[FAILED] {error_msg}")
         metadata["status"] = "FAILED"
         metadata["message"] = error_msg
-        log_email_send(receiver, subject, "[FAILED]", error_msg)
+        for recipient in recipients:
+            log_email_send(recipient, subject, "[FAILED]", error_msg)
         return False, metadata

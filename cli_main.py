@@ -1,3 +1,4 @@
+import argparse
 import csv
 import re
 import os
@@ -8,6 +9,7 @@ from email_sender import send_email, validate_email
 from logger import log_email_send, get_log_summary, view_logs, clear_logs
 from email_reader import EmailReader
 from auto_reply_engine import AutoReplyEngine
+import web_server
 
 try:
     from rich.console import Console
@@ -323,23 +325,32 @@ def view_email_logs():
         try:
             if "[" in log_line and "]" in log_line:
                 timestamp = log_line[1:log_line.index("]")]
-                
+
                 if "To:" in log_line:
                     email_start = log_line.index("To:") + 4
                     email_end = log_line.index("|", email_start)
                     email = log_line[email_start:email_end].strip()
-                    
-                    if "SUCCESS" in log_line:
-                        status = "✅ SUCCESS"
-                        status_style = "green"
-                    elif "FAILED" in log_line:
-                        status = "❌ FAILED"
-                        status_style = "red"
-                    else:
-                        status = "⚠️  UNKNOWN"
-                        status_style = "yellow"
-                    
-                    log_table.add_row(timestamp, email, f"[{status_style}]{status}[/{status_style}]")
+                elif "From:" in log_line:
+                    email_start = log_line.index("From:") + 6
+                    email_end = log_line.index("|", email_start)
+                    email = log_line[email_start:email_end].strip()
+                else:
+                    continue
+
+                if "SUCCESS" in log_line:
+                    status = "✅ SUCCESS"
+                    status_style = "green"
+                elif "FAILED" in log_line:
+                    status = "❌ FAILED"
+                    status_style = "red"
+                elif "RECEIVED" in log_line:
+                    status = "📥 RECEIVED"
+                    status_style = "cyan"
+                else:
+                    status = "⚠️  UNKNOWN"
+                    status_style = "yellow"
+
+                log_table.add_row(timestamp, email, f"[{status_style}]{status}[/{status_style}]")
         except Exception:
             continue
     
@@ -518,19 +529,36 @@ def monitor_incoming_emails():
     console.print(results_table)
     console.print()
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Email automation CLI")
+    parser.add_argument("--menu", action="store_true", help="Show the interactive terminal menu")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+
+    server_thread = threading.Thread(target=web_server.main)
+    server_thread.start()
+
     try:
         display_web_app_link()
+
+        if not args.menu:
+            console.print("[cyan]The web dashboard is ready. Open the link above to continue.[/cyan]\n")
+            console.print("[cyan]Press Ctrl+C to stop the server when finished.[/cyan]\n")
+            server_thread.join()
+            return
 
         if not RICH_AVAILABLE:
             return
 
         display_banner()
-        
+
         while True:
             display_menu()
             choice = Prompt.ask("[bold cyan]Enter your choice[/bold cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8"])
-            
+
             if choice == "1":
                 send_single_email()
             elif choice == "2":

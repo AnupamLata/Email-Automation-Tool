@@ -81,6 +81,7 @@ def setup_gmail():
 PASSWORD={password}
 SMTP_SERVER=smtp.gmail.com
 PORT=587
+WEB_PORT=8001
 """
         with open(".env", "w") as f:
             f.write(env_content)

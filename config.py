@@ -13,5 +13,6 @@ load_dotenv(ENV_FILE)
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-PORT = int(os.getenv("PORT", 587))
+SMTP_PORT = int(os.getenv("PORT", 587))
+WEB_PORT = int(os.getenv("WEB_PORT", 8001))
 

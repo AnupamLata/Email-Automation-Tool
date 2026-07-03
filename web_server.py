@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 import json
 
+
 from api.project_data import (
     AUTO_REPLIES_FILE,
     BLACKLIST_FILE,
@@ -20,6 +21,7 @@ from api.project_data import (
     validate_email_address,
     write_json_response,
 )
+from config import WEB_PORT
 
 ROOT_DIR = Path(__file__).resolve().parent
 STATIC_DIR = ROOT_DIR / "static"
@@ -406,7 +408,7 @@ class handler(BaseHTTPRequestHandler):
 
 
 def main():
-    port = int(os.getenv("WEB_PORT", os.getenv("PORT", "8001")))
+    port = WEB_PORT
     server = ThreadingHTTPServer(("", port), handler)
     print(f"Serving Email Automation System on http://localhost:{port}")
     server.serve_forever()

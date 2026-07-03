@@ -6,7 +6,7 @@ const state = {
 };
 
 const URL_PARAMS = new URLSearchParams(window.location.search);
-const DEMO_MODE = URL_PARAMS.get('demo') === '1' || window.location.protocol === 'file:';
+const DEMO_MODE = URL_PARAMS.get('demo') === '1';
 const DEMO_STORAGE_KEY = 'email-automation-system-demo-state';
 const DEFAULT_DEMO_STATE = {
   contacts: [
@@ -180,6 +180,13 @@ function showToast(message, type = 'info') {
   }, 4200);
 }
 
+function getApiBaseUrl() {
+  if (window.location.protocol === 'file:') {
+    return 'http://localhost:8001';
+  }
+  return '';
+}
+
 async function api(path, options = {}) {
   if (DEMO_MODE) {
     const body = readDemoBody(options);
@@ -348,7 +355,8 @@ async function api(path, options = {}) {
     throw new Error(`Unsupported demo request: ${path}`);
   }
 
-  const response = await fetch(path, {
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -416,7 +424,7 @@ function renderStatus(config = {}) {
   const files = config.files || {};
   const smtpValue = demoMode ? 'Browser demo / local storage' : `${config.smtpServer || 'smtp.gmail.com'}:${config.port || '587'}`;
   const rows = [
-    ['Mode', demoMode ? 'Browser storage' : 'Live backend'],
+    ['Mode', demoMode ? 'Browser storage' : 'SMTP backend'],
     ['Email account', config.emailConfigured ? 'Connected' : 'Missing EMAIL'],
     ['Password', config.passwordConfigured ? 'Available' : 'Missing PASSWORD'],
     ['SMTP server', smtpValue],
@@ -532,6 +540,45 @@ function renderAutomation() {
     : 'No blacklisted senders.';
 }
 
+function groupLogEntries(entries = []) {
+  const grouped = new Map();
+  const orderedEntries = Array.isArray(entries) ? entries : [];
+
+  orderedEntries.forEach((entry) => {
+    const statusValue = String(entry.status || '').toUpperCase();
+    const directionValue = statusValue === 'RECEIVED' ? 'Received' : 'Sent';
+    const recipientLabel = entry.recipient || 'Unknown';
+    const key = `${directionValue.toLowerCase()}:${recipientLabel.toLowerCase()}`;
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        recipient: recipientLabel,
+        subject: entry.subject || 'No subject',
+        timestamp: entry.timestamp || '',
+        status: statusValue,
+        direction: directionValue,
+        message: entry.message || '',
+        count: 1
+      });
+      return;
+    }
+
+    const existing = grouped.get(key);
+    existing.count += 1;
+    if (entry.timestamp) {
+      existing.timestamp = entry.timestamp;
+    }
+    if (entry.subject) {
+      existing.subject = entry.subject;
+    }
+    if (entry.message) {
+      existing.message = entry.message;
+    }
+  });
+
+  return Array.from(grouped.values());
+}
+
 function renderLogs(payload = {}) {
   state.logs = payload.entries || [];
   if (!state.logs.length) {
@@ -542,30 +589,117 @@ function renderLogs(payload = {}) {
     return;
   }
 
-  const logMarkup = state.logs.map((entry) => {
-    const statusClass = entry.status === 'SUCCESS' ? 'success' : 'failed';
+  // Render individual entries as cards (page-2 style)
+  const entries = Array.isArray(state.logs) ? state.logs : [];
+  // build contact lookup for display names
+  const contactLookup = new Map((state.contacts || []).map((c) => [String(c.email || '').toLowerCase(), c.name || '']));
+  const logMarkup = entries.map((entry, idx) => {
+    const statusValue = String(entry.status || '').toUpperCase();
+    const directionValue = statusValue === 'RECEIVED' ? 'Received' : 'Sent';
+    const recipientLabel = entry.recipient || 'Unknown';
+    const emailKey = String(recipientLabel).toLowerCase();
+    const displayName = contactLookup.get(emailKey) || recipientLabel;
+    const messagePreview = entry.message ? String(entry.message).replace(/\s+/g, ' ').trim() : '';
+    let statusClass = 'failed';
+    if (statusValue === 'SUCCESS') statusClass = 'success';
+    else if (statusValue === 'RECEIVED') statusClass = 'received';
+
     return `
-      <article class="log-row">
-        <div>
-          <strong>${escapeHtml(entry.subject)}</strong>
-          <span>${escapeHtml(entry.recipient)} • ${escapeHtml(entry.timestamp)}</span>
-          ${entry.message ? `<small>${escapeHtml(entry.message)}</small>` : ''}
+      <article class="log-card" data-index="${idx}">
+        <div class="log-card-main">
+          <div class="log-card-left">
+            <strong class="log-subject">${escapeHtml(entry.subject || 'No subject')}</strong>
+            <div class="log-meta">${escapeHtml(displayName)} • ${escapeHtml(entry.timestamp || '')}</div>
+          </div>
+          <div class="log-card-right">
+            <span class="status-pill ${statusClass}">${escapeHtml(statusValue || 'UNKNOWN')}</span>
+          </div>
         </div>
-        <b class="${statusClass}">${escapeHtml(entry.status)}</b>
       </article>
     `;
   }).join('');
 
   elements.logsList.className = 'log-list';
   elements.logsList.innerHTML = logMarkup;
+
+  // recent activity: show latest 4 entries compactly
   elements.recentActivity.className = 'activity-list';
-  elements.recentActivity.innerHTML = state.logs.slice(0, 4).map((entry) => `
+  elements.recentActivity.innerHTML = entries.slice(0, 4).map((entry) => `
     <div class="activity-row">
-      <span>${escapeHtml(entry.subject)}</span>
-      <strong>${escapeHtml(entry.status)}</strong>
+      <span>${escapeHtml(entry.subject || 'No subject')} • ${escapeHtml(entry.recipient || 'Unknown')}</span>
+      <strong>${escapeHtml(String(entry.status || '').toUpperCase() || 'UNKNOWN')}</strong>
     </div>
   `).join('');
 }
+
+// Log detail pane handling
+const logDetailEl = $('#logDetail');
+const logDetailBody = $('#logDetailBody');
+const logDetailTitle = $('#logDetailTitle');
+
+function showLogDetail(recipient, direction) {
+  if (!recipient) return;
+  const recipientKey = String(recipient).toLowerCase();
+  const wantReceived = String(direction || '').toLowerCase() === 'received';
+  const matches = (state.logs || []).filter((e) => {
+    const r = String(e.recipient || '').toLowerCase();
+    const s = String(e.status || '').toUpperCase();
+    const isReceived = s === 'RECEIVED';
+    return r === recipientKey && (wantReceived ? isReceived : !isReceived);
+  }).sort((a,b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+
+  logDetailTitle.textContent = `${recipient} — ${direction}`;
+  if (!matches.length) {
+    logDetailBody.innerHTML = `<div class="empty-state">No messages for ${escapeHtml(recipient)}</div>`;
+  } else {
+    logDetailBody.innerHTML = matches.map((m) => `
+      <article class="log-message">
+        <header>
+          <strong>${escapeHtml(m.subject || 'No subject')}</strong>
+          <span class="meta">${escapeHtml(m.timestamp || '')} • ${escapeHtml(m.status || '')}</span>
+        </header>
+        <div class="body">${escapeHtml(m.message || '')}</div>
+      </article>
+    `).join('');
+  }
+
+  if (logDetailEl) logDetailEl.classList.remove('is-hidden');
+}
+
+if (elements.logsList) {
+  elements.logsList.addEventListener('click', (ev) => {
+    const row = ev.target.closest && ev.target.closest('article');
+    if (!row) return;
+    const idx = row.dataset && row.dataset.index;
+    if (typeof idx !== 'undefined') {
+      const i = parseInt(idx, 10);
+      if (!Number.isNaN(i) && state.logs[i]) {
+        showLogDetailByIndex(i);
+      }
+    }
+  });
+}
+
+function showLogDetailByIndex(index) {
+  const entry = (state.logs || [])[index];
+  if (!entry) return;
+  const recipient = entry.recipient || 'Unknown';
+  const direction = String(entry.status || '').toUpperCase() === 'RECEIVED' ? 'Received' : 'Sent';
+  logDetailTitle.textContent = `${recipient} — ${direction}`;
+  logDetailBody.innerHTML = `
+    <article class="log-message">
+      <header>
+        <strong>${escapeHtml(entry.subject || 'No subject')}</strong>
+        <span class="meta">${escapeHtml(entry.timestamp || '')} • ${escapeHtml(entry.status || '')}</span>
+      </header>
+      <div class="body">${escapeHtml(entry.message || '')}</div>
+    </article>
+  `;
+  if (logDetailEl) logDetailEl.classList.remove('is-hidden');
+}
+
+const closeBtn = $('#closeLogDetail');
+if (closeBtn) closeBtn.addEventListener('click', () => logDetailEl && logDetailEl.classList.add('is-hidden'));
 
 async function loadDashboard() {
   try {

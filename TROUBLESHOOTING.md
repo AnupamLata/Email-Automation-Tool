@@ -24,6 +24,7 @@ EMAIL=your_email@gmail.com
 PASSWORD=your_app_password
 SMTP_SERVER=smtp.gmail.com
 PORT=587
+WEB_PORT=8001
 
 # 4. Save and restart application
 python main.py

@@ -64,7 +64,7 @@
 
         <div class="hero-stack">
           <article class="hero-tile">
-            <span>Live</span>
+            <span>Ready</span>
             <strong>Working forms</strong>
             <p>Single email, bulk email, contacts, blacklist, and reply rules are all editable here.</p>
           </article>
@@ -275,6 +275,13 @@
             <button id="clearLogsBtn" class="danger-button" type="button">Clear Logs</button>
           </div>
           <div id="logsList" class="log-list empty-state">Loading logs...</div>
+          <div id="logDetail" class="log-detail is-hidden" aria-live="polite">
+            <div class="log-detail-header">
+              <strong id="logDetailTitle">Conversation</strong>
+              <button id="closeLogDetail" class="ghost-button" type="button">Close</button>
+            </div>
+            <div id="logDetailBody" class="log-detail-body"></div>
+          </div>
         </section>
       </main>
 

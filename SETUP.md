@@ -45,7 +45,12 @@ This will install:
    PASSWORD=your_16_char_app_password
    SMTP_SERVER=smtp.gmail.com
    PORT=587
+   WEB_PORT=8001
    ```
+
+   - `PORT` is the SMTP server port for sending email
+   - `WEB_PORT` is the local port where the web dashboard is served
+
 
 #### Option B: Using Other Email Providers
 

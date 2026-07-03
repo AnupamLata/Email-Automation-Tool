@@ -207,7 +207,10 @@ EMAIL=your_email@gmail.com
 PASSWORD=your_app_password
 SMTP_SERVER=smtp.gmail.com
 PORT=587
+WEB_PORT=8001
 ```
+
+`PORT` is the SMTP port used for sending email, while `WEB_PORT` is the local dashboard port for the browser UI.
 
 ### Supported Email Providers
 
