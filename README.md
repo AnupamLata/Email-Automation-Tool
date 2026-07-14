@@ -6,6 +6,8 @@ A professional, feature-rich email automation tool built with Python. Send singl
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
+[![Website](https://img.shields.io/badge/Website-Visit_Now-blue?style=for-the-badge&logo=googlechrome)](https://email-automation-tool-3qzm.vercel.app/)
+
 ---
 
 ## ✨ Features
