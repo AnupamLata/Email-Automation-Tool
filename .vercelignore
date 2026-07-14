@@ -1,8 +1,6 @@
-# Ignore CLI and non-function Python files so Vercel doesn't treat them as serverless functions
+# Ignore CLI-only entry points. Keep imported helper modules available to API functions.
 /cli_main.py
 /main.py
-/*.py
-!/api/*.py
 
 # Python environment and caches
 .venv

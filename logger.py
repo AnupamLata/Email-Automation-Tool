@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
-LOG_FILE = "email_log.txt"
+LOG_FILE = Path(__file__).resolve().parent / "email_log.txt"
 """Log file path: email_log.txt
 
 Contains all email send attempts with:
@@ -48,8 +49,13 @@ def log_email_send(recipient, subject, status, message=""):
         log_entry += f" | Message: {message}"
     log_entry += "\n"
     
-    with open(LOG_FILE, "a") as f:
-        f.write(log_entry)
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(log_entry)
+    except OSError:
+        # Serverless platforms can expose the deployment as read-only.
+        # Email sending should not fail just because file logging is unavailable.
+        return
 
 def get_log_summary():
     """Get summary statistics from log file
@@ -81,7 +87,7 @@ def get_log_summary():
     failed_count = 0
     
     try:
-        with open(LOG_FILE, "r") as f:
+        with open(LOG_FILE, "r", encoding="utf-8") as f:
             entries = f.readlines()
             success_count = sum(1 for line in entries if "✅ SUCCESS" in line)
             failed_count = sum(1 for line in entries if "❌ FAILED" in line)
@@ -135,7 +141,7 @@ def view_logs():
         return None
     
     try:
-        with open(LOG_FILE, "r") as f:
+        with open(LOG_FILE, "r", encoding="utf-8") as f:
             return f.readlines()
     except Exception:
         return None
